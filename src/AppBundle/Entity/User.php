@@ -3,10 +3,11 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use AppBundle\Entity\Position;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="user")
+ * @ORM\Table(name="user", options={"collate"="utf8_general_ci", "charset"="utf8"})
  */
 class User
 {
@@ -25,8 +26,8 @@ class User
 	/**
 	 * Every user can have only one position
 	 *
-     * @ManyToOne(target="Position")
-     * @JoinColumn(name="user_position_id", referencedColumnName="position_id")
+     * @ORM\ManyToOne(targetEntity="Position")
+     * @ORM\JoinColumn(name="user_position_id", referencedColumnName="position_id")
      */
 	private $position;
 

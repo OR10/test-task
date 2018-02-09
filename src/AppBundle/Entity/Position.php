@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="position")
+ * @ORM\Table(name="position", options={"collate"="utf8_general_ci", "charset"="utf8"})
  */
 class Position
 {
