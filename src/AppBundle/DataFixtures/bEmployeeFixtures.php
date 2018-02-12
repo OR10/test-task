@@ -30,11 +30,9 @@ class bEmployeeFixtures extends Fixture
 		$pk++;
 
 		// For one Senior (position #2) - 5 Middle developers
-		// $middlesStack = 5;
-		$middlesStack = 3;
+		$middlesStack = 5;
 		// For one Middle (position #3) - 3 Juniors
-		// $juniorsStack = 3;
-		$juniorsStack = 2;
+		$juniorsStack = 3;
 		// For one Junior (position #4) - 1 Trainee (position #5)
 		$traineesStack = 1;
 		
@@ -47,7 +45,6 @@ class bEmployeeFixtures extends Fixture
 						$currentPosition = 5;
 						$currentSalary = mt_rand(100, 300);
 						$traineesStack--;
-						echo "Trainee\n";
 					} else {
 						$currentPosition = 4;
 						$currentSalary = mt_rand(300, 1500);
@@ -56,7 +53,6 @@ class bEmployeeFixtures extends Fixture
 						// For one Junior (position #4) - 1 Trainee (position #5)
 						$traineesStack = 1;
 						$this->setReference('parent_employee'.$currentPosition, $employee);
-						echo "Junior\n";
 					}						
 				} else {
 					$currentPosition = 3;
@@ -64,10 +60,8 @@ class bEmployeeFixtures extends Fixture
 					$lastMiddleId = $pk;
 					$middlesStack--;
 					// For one Middle (position #3) - 3 Juniors
-					// $juniorsStack = 3;
-					$juniorsStack = 2;
+					$juniorsStack = 3;
 					$this->setReference('parent_employee'.$currentPosition, $employee);
-					echo "Middle\n";
 				}
 			} else {
 				$currentPosition = 2;
@@ -76,11 +70,8 @@ class bEmployeeFixtures extends Fixture
 				$lastMiddleId = null;
 				$lastJuniorId = null;
 				// For one Senior (position #2) - 5 Middle developers
-				// $middlesStack = 5;
-				$middlesStack = 3;
-				// $seniorsStack = 1;
+				$middlesStack = 5;
 				$this->setReference('parent_employee'.$currentPosition, $employee);
-				echo "\nSenior\n";
 			}
 
 			$employee->setId($pk);
