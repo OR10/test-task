@@ -11,9 +11,9 @@ class bEmployeeFixtures extends Fixture
 {
 	public function load(ObjectManager $manager)
 	{
-		$firstNames = array('Kot', 'Dog', 'Carol', 'Swift', 'Man', 'Dirk', 'Sergey', 'Jonas', 'Sandy', 'Liza');
-		$lastNames = array('James', 'West', 'Gates', 'Jobs', 'Colyns', 'Messi', 'Ronaldo', 'Shevchenko', 'Blackberry');
-		$thirdNames = array('Petrovych', 'Ivanych', 'Josepovych', 'Li', 'de Petite', 'Jack', 'the 2-th', 'the 3-th');
+		$firstNames = array('Kot', 'Dog', 'Karl', 'Kolya', 'Carol', 'Swift', 'Man', 'Dirk', 'Sergey', 'Jonas', 'Sandy', 'Liza');
+		$lastNames = array('James', 'West', 'Gates', 'Jobs', 'Colyns', 'Messi', 'Ronaldo', 'Shevchenko', 'Blackberry', 'Deer');
+		$thirdNames = array('Petrovych', 'Ivanych', 'Josepovych', 'Li', 'de Petite', 'Jack', 'the 2-th', 'the 3-th', 'Lostar');
 		$arrayOfDates = $this->dateRange('2000-04-11', '2017-12-30');
 		
 		// Current object primary key

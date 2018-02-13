@@ -5,6 +5,8 @@ namespace AppBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Doctrine\ORM\EntityManagerInterface;
 
 class DefaultController extends Controller
 {
@@ -13,22 +15,38 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {      
+        $employeesArr = $this->getEmployees();
+        if (!$employeesArr) {
+            throw $this->createNotFoundException(
+            'No employees found!');
+        }
 
-        return $this->render('default/index.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
+        return $this->render('default/main.html.twig', [
+            'employees_list' => $employeesArr
         ]);
     }
 
     /**
-     * @Route("/k", name="kpage")
+     * @Route("/employees", name="employees_list")
      */
-    public function kAction(Request $request)
-    {      
-        echo 1;
-        die;
-        return $this->render('default/index.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
+    public function showEmployeesListAction(Request $request)
+    {
+        $employeesArr = $this->getEmployees();
+        if (!$employeesArr) {
+            throw $this->createNotFoundException(
+            'No employees found!');
+        }
+
+        return $this->render('default/employees.html.twig', [
+            'employees_list' => $employeesArr
         ]);
+    }
+
+    public function getEmployees()
+    {
+        $employees = $this->getDoctrine()->getRepository('AppBundle:Employee')->findAll();
+
+        return $employees;
     }
 
 }

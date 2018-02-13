@@ -1,0 +1,26 @@
+{% extends 'default/index.html.twig' %}
+
+{% block body %}
+    <div id="out-tree">
+        <h3>{{ "Tree" }}</h3>
+        <br><br>
+        <div class="list-group">
+            {% for employee in employees_list %}
+                {% set position_level = employee.positionId.level %}
+                {% if position_level == 1 %}
+                    {% set color_phrase = 'list-group-item-dark' %}
+                {% elseif position_level == 2 %}                    
+                    {% set color_phrase = 'list-group-item-primary' %}
+                {% elseif position_level == 3 %}
+                    {% set color_phrase = 'list-group-item-danger' %}                    
+                {% elseif position_level == 4 %}
+                    {% set color_phrase = 'list-group-item-success' %}
+                {% elseif position_level == 5 %}
+                    {% set color_phrase = 'list-group-item-warning' %}
+                {% endif %}
+
+                <a href="#" class="list-group-item list-group-item-action {{color_phrase ?? ''}}" style="margin-left: {{position_level * 50}}px;">{{ employee.fullName }} <span>---{{ employee.positionId.name }}---</span></a>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

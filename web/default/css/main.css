@@ -1,0 +1,71 @@
+body {
+	background: #F5F5F5;
+	font: 18px/1.5 sans-serif;	
+}
+h1 {
+	font-size: 36px;
+}
+h2 {
+	font-size: 21px;
+	margin-bottom: 1em;
+}
+p {
+	margin: 0 0 1em 0;
+}
+a {
+	color: #f00090;
+}
+a:hover {
+	text-decoration: none;
+}
+.wrapper {
+	margin: 1em auto;
+	max-width: 1000px;
+	width: 95%;	
+}
+.container {
+	padding: 2em;
+}
+#welcome, #status {
+	margin-bottom: 2em;
+}
+#welcome h1 span {
+	display: block;
+	font-size: 75%;
+}
+#icon-status {
+	float: left;
+	height: 64px;
+	margin-right: 1em;
+	margin-top: -4px;
+	width: 64px;
+}
+
+#out-tree {
+	padding: 2em;
+	max-width: 1000px;
+	margin: auto auto 10em;
+	background: #FFF;
+	border-radius: 10px;
+}
+#out-tree h3 {
+	border-bottom: 2px solid #dee2e6;
+}
+#out-tree .list-group {
+	margin-left: -50px;
+}
+#out-tree .list-group-item {
+	display: block;
+	width: 400px;
+	margin: 1px;
+	padding: 10px;
+	border-radius: 10px;
+}
+#out-tree .list-group a span {
+	float: right;
+	font-size: 15px;
+}
+#out-tree table td, #out-tree table th {
+	border-radius: 10px;
+	border: none;
+}

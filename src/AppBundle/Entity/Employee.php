@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 /**
  * @ORM\Entity
  * @ORM\Table(name="employee", options={"collate"="utf8_general_ci", "charset"="utf8"})
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\EmployeeRepository")
  */
 class Employee
 {
@@ -85,7 +86,7 @@ class Employee
 
 	public function getPositionId()
 	{
-	    return $this->position;
+	    return $this->positionId;
 	}
 	 
 	public function setPositionId($positionId)
@@ -126,4 +127,38 @@ class Employee
 	    $this->parentId = $parentId;
 	    return $this;
 	}
+
+    /**
+     * Add child
+     *
+     * @param \AppBundle\Entity\Employee $child
+     *
+     * @return Employee
+     */
+    public function addChild(\AppBundle\Entity\Employee $child)
+    {
+        $this->children[] = $child;
+
+        return $this;
+    }
+
+    /**
+     * Remove child
+     *
+     * @param \AppBundle\Entity\Employee $child
+     */
+    public function removeChild(\AppBundle\Entity\Employee $child)
+    {
+        $this->children->removeElement($child);
+    }
+
+    /**
+     * Get children
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
 }
