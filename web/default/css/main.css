@@ -51,6 +51,9 @@ a:hover {
 #out-tree h3 {
 	border-bottom: 2px solid #dee2e6;
 }
+.container .nav a {
+	width: 120px;
+}
 #out-tree .list-group {
 	margin-left: -50px;
 }
@@ -68,4 +71,10 @@ a:hover {
 #out-tree table td, #out-tree table th {
 	border-radius: 10px;
 	border: none;
+}
+#out-tree table {
+	cursor: pointer;
+}
+#out-tree div[name=searchWrapper] {
+	width: 300px;
 }

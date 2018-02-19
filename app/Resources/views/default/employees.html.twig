@@ -3,43 +3,56 @@
 {% block body %}
 	<div id="out-tree">
 		<h3>{{ "List" }}</h3>
-		<br><br>
-		<table class="table table-hover">
-			<thead>
-				<tr>
-				  <th scope="col">#</th>
-				  <th scope="col">Full name</th>
-				  <th scope="col">Position</th>
-				  <th scope="col">Salary</th>
-				  <th scope="col">Head</th>
-				  <th scope="col">Recruiting date</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for employee in employees_list %}
-					{% set position_level = employee.positionId.level %}
-					{% if position_level == 1 %}
-						{% set color_phrase = 'table-dark' %}
-					{% elseif position_level == 2 %}                    
-						{% set color_phrase = 'table-primary' %}
-					{% elseif position_level == 3 %}
-						{% set color_phrase = 'table-danger' %}                    
-					{% elseif position_level == 4 %}
-						{% set color_phrase = 'table-success' %}
-					{% elseif position_level == 5 %}
-						{% set color_phrase = 'table-warning' %}
-					{% endif %}
-
+		<br>
+		<div name="searchWrapper" class="input-group mb-3">
+			<div class="input-group-prepend">
+				<button class="btn btn-outline-secondary" type="button">Search</button>
+			</div>
+			<input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+		</div>
+		<br>
+		{% block table %}
+			<table name="employeeTable" class="table table-hover">
+				<thead>
 					<tr>
-						<td class="{{color_phrase ?? ''}}">{{ employee.id }}</td>
-						<td class="{{color_phrase ?? ''}}">{{ employee.fullName }}</td>
-						<td class="{{color_phrase ?? ''}}">{{ employee.positionId.name }}</td>
-						<td class="{{color_phrase ?? ''}}">{{ employee.salary }}</td>
-						<td class="{{color_phrase ?? ''}}">{{ employee.parentId.fullName ?? 'I`m the director' }}</td>
-						<td class="{{color_phrase ?? ''}}">{{ employee.recruitingDate|date("m-d-Y") }}</td>
+					  <th class="table-light" scope="col" name="id" sort="{{sortBy ?? 'asc'}}">#</th>
+					  <th class="table-light" scope="col" name="fullName" sort="{{sortBy ?? 'asc'}}">Full name</th>
+					  <th class="table-light" scope="col" name="positionId" sort="{{sortBy ?? 'asc'}}">Position</th>
+					  <th class="table-light" scope="col" name="salary" sort="{{sortBy ?? 'asc'}}">Salary</th>
+					  <th class="table-light" scope="col" name="parentId" sort="{{sortBy ?? 'asc'}}">Head</th>
+					  <th class="table-light" scope="col" name="recruitingDate" sort="{{sortBy ?? 'asc'}}">Recruiting date</th>
 					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+				</thead>
+				<tbody>
+					{% if employees_list is defined and employees_list|length > 0 %}
+						{% for employee in employees_list %}
+							{% set position_level = employee.positionId.level %}
+							{% if position_level == 1 %}
+								{% set color_phrase = 'table-dark' %}
+							{% elseif position_level == 2 %}                    
+								{% set color_phrase = 'table-primary' %}
+							{% elseif position_level == 3 %}
+								{% set color_phrase = 'table-danger' %}                    
+							{% elseif position_level == 4 %}
+								{% set color_phrase = 'table-success' %}
+							{% elseif position_level == 5 %}
+								{% set color_phrase = 'table-warning' %}
+							{% endif %}
+
+							<tr>
+								<td class="{{color_phrase ?? ''}}">{{ employee.id }}</td>
+								<td class="{{color_phrase ?? ''}}">{{ employee.fullName }}</td>
+								<td class="{{color_phrase ?? ''}}">{{ employee.positionId.name }}</td>
+								<td class="{{color_phrase ?? ''}}">{{ employee.salary }}</td>
+								<td class="{{color_phrase ?? ''}}">{{ employee.parentId.fullName ?? 'I`m the director' }}</td>
+								<td class="{{color_phrase ?? ''}}">{{ employee.recruitingDate|date("Y-m-d") }}</td>
+							</tr>
+						{% endfor %}
+					{% else %}
+						{{ "No employees" }}
+					{% endif %}
+				</tbody>
+			</table>
+		{% endblock %}
 	</div>
 {% endblock %}

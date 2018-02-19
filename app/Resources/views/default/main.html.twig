@@ -5,6 +5,7 @@
         <h3>{{ "Tree" }}</h3>
         <br><br>
         <div class="list-group">
+        {% if employees_list is defined %}
             {% for employee in employees_list %}
                 {% set position_level = employee.positionId.level %}
                 {% if position_level == 1 %}
@@ -21,6 +22,9 @@
 
                 <a href="#" class="list-group-item list-group-item-action {{color_phrase ?? ''}}" style="margin-left: {{position_level * 50}}px;">{{ employee.fullName }} <span>---{{ employee.positionId.name }}---</span></a>
             {% endfor %}
+        {% else %}
+            {{ "No employees" }}
+        {% endif %}
         </div>
     </div>
 {% endblock %}
