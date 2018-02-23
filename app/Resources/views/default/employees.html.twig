@@ -2,31 +2,40 @@
 
 {% block body %}
 	<div id="out-tree">
+		{% if app.session.flashBag.has('success') %}
+            <div class="alert alert-success">
+                {% for msg in app.session.flashBag.get('success') %}
+                    {{ msg }}
+                {% endfor %}
+            </div>
+        {% endif %}
 		<h3>{{ "List" }}</h3>
 		<br>
-		<div name="searchWrapper" class="input-group mb-3">
-			<div class="input-group-prepend">
+		<div class="input-group mb-3">
+			<div name="searchWrapper" class="input-group-prepend">
 				<button class="btn btn-outline-secondary" type="button">Search</button>
+				<input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
 			</div>
-			<input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+
+			<button id="addEmployee" class="btn btn-outline-secondary" type="button">Add Employee</button>
 		</div>
 		<br>
 		{% block table %}
-			<table name="employeeTable" class="table table-hover">
-				<thead>
-					<tr>
-					  <th class="table-light" scope="col" name="id" sort="{{sortBy ?? 'asc'}}">#</th>
-					  <th class="table-light" scope="col" name="fullName" sort="{{sortBy ?? 'asc'}}">Full name</th>
-					  <th class="table-light" scope="col" name="positionId" sort="{{sortBy ?? 'asc'}}">Position</th>
-					  <th class="table-light" scope="col" name="salary" sort="{{sortBy ?? 'asc'}}">Salary</th>
-					  <th class="table-light" scope="col" name="parentId" sort="{{sortBy ?? 'asc'}}">Head</th>
-					  <th class="table-light" scope="col" name="recruitingDate" sort="{{sortBy ?? 'asc'}}">Recruiting date</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% if employees_list is defined and employees_list|length > 0 %}
+			{% if employees_list is defined and employees_list|length > 0 %}
+				<table name="employeeTable" class="table table-hover">
+					<thead>
+						<tr>
+						  <th class="table-light" scope="col" name="id" sort="{{sortBy ?? 'asc'}}">#</th>
+						  <th class="table-light" scope="col" name="fullName" sort="{{sortBy ?? 'asc'}}">Full name</th>
+						  <th class="table-light" scope="col" name="positionId" sort="{{sortBy ?? 'asc'}}">Position</th>
+						  <th class="table-light" scope="col" name="salary" sort="{{sortBy ?? 'asc'}}">Salary</th>
+						  <th class="table-light" scope="col" name="parentId" sort="{{sortBy ?? 'asc'}}">Head</th>
+						  <th class="table-light" scope="col" name="recruitingDate" sort="{{sortBy ?? 'asc'}}">Recruiting date</th>
+						</tr>
+					</thead>
+					<tbody>
 						{% for employee in employees_list %}
-							{% set position_level = employee.positionId.level %}
+							{% set position_level = employee.positionId.level ?? 0 %}
 							{% if position_level == 1 %}
 								{% set color_phrase = 'table-dark' %}
 							{% elseif position_level == 2 %}                    
@@ -37,22 +46,87 @@
 								{% set color_phrase = 'table-success' %}
 							{% elseif position_level == 5 %}
 								{% set color_phrase = 'table-warning' %}
+							{% else %}
+								{% set color_phrase = 'table-light' %}
 							{% endif %}
 
 							<tr>
-								<td class="{{color_phrase ?? ''}}">{{ employee.id }}</td>
-								<td class="{{color_phrase ?? ''}}">{{ employee.fullName }}</td>
-								<td class="{{color_phrase ?? ''}}">{{ employee.positionId.name }}</td>
-								<td class="{{color_phrase ?? ''}}">{{ employee.salary }}</td>
-								<td class="{{color_phrase ?? ''}}">{{ employee.parentId.fullName ?? 'I`m the director' }}</td>
-								<td class="{{color_phrase ?? ''}}">{{ employee.recruitingDate|date("Y-m-d") }}</td>
+								<td name="employeeId" class="{{color_phrase ?? ''}}">{{ employee.id }}</td>
+								<td name="fullName" class="{{color_phrase ?? ''}}">{{ employee.fullName }}</td>
+								<td name="positionName" positionId="{{ employee.positionId.id }}" class="{{color_phrase ?? ''}}">{{ employee.positionId.name }}</td>
+								<td name="salary" class="{{color_phrase ?? ''}}">{{ employee.salary }}</td>
+								<td name="parentName" parentId="{{ employee.parentId.id ?? '' }}" class="{{color_phrase ?? ''}}">{{ employee.parentId.fullName ?? 'I`m the director' }}</td>
+								<td name="recruitingDate" class="{{color_phrase ?? ''}}">{{ employee.recruitingDate|date("Y-m-d") }}</td>
+								<td class="{{color_phrase ?? ''}}"><i name="editBtn" class="mdi mdi-mode-edit"></i></td>
+								<td name="deleteCell" class="{{color_phrase ?? ''}}"><a href="{{ path('employee_delete', { 'employeeId': employee.id }) }}"><i name="deleteBtn" class="mdi mdi-delete"></i></a></td>
 							</tr>
 						{% endfor %}
-					{% else %}
-						{{ "No employees" }}
-					{% endif %}
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+			{% else %}
+				<span>{{ "No employees" }}</span>
+			{% endif %}
 		{% endblock %}
 	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="employeeModal" role="dialog">
+		<div class="modal-dialog">
+		  <div class="modal-content">
+		    <div class="modal-header">
+		      <h4 class="modal-title">Edit Employee data</h4>
+		      <button type="button" class="close" data-dismiss="modal">&times;</button>
+		    </div>
+		    <div class="modal-body">
+			    <div class="form-group">
+			    	<label for="usr">Full name:</label>
+					<input name= "fullName" type="text" class="form-control">
+			    </div>
+				<div class="form-group">
+			    	<label for="usr">Position (lvl):</label>
+					<!-- <input name= "positionName" type="text" class="form-control"> -->
+					<select name="positions">
+					{% for position in positions_list %}
+						{# {% if employee.positionId.level != 5 %} #}
+							<option value="{{ position.id }}" level="{{ position.level }}">{{ position.name }} ({{ position.level }})</option>
+						{# {% endif %} #}
+					{% endfor %}
+					</select>
+			    </div>
+			    <div class="form-group">
+			    	<label for="usr">Salary:</label>
+					<input name= "salary" type="text" class="form-control">
+			    </div>
+			    <div class="form-group">
+			    	<label for="usr">Head (id):</label>
+					<!-- <input name= "parentName" type="text" class="form-control"> -->
+					<select name="employees">
+						{% if employees_list|length > 0 %}	
+							{% for employee in employees_list %}
+								{% if employee.positionId.level != 5 %}
+									<option value="{{ employee.id }}" level="{{ employee.positionId.level }}">{{ employee.fullName }} ({{ employee.id }}) - {{ employee.positionId.name }}</option>
+								{% endif %}
+							{% endfor %}
+						{% else %}
+							<option value="0" level="0">You will be the director</option>
+						{% endif %}
+					</select>
+			    </div>
+			    <div class="form-group">
+			    	<label for="usr">Recruiting date:</label>
+					<input name= "recruitingDate" type="text" class="form-control">
+			    </div>
+		    </div>
+		    <div class="modal-footer">
+			    <button type="button" class="btn btn-default" id="saveBtn">Save</button>
+			    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+		    </div>
+		  </div>
+		  
+		</div>
+	</div>
 {% endblock %}
+
+{#
+	1. Change all for position and head in main.js and defaultcontroller (now it's select instead of input)
+#}

@@ -1,0 +1,16 @@
+{% extends 'default/index.html.twig' %}
+
+{% block body %}
+<div id="login-container">
+	{% if error is defined %}
+	    <div class="alert alert-danger">{{ error|replace({"\n": "<br>"})|raw }}</div>
+	{% endif %}
+	{{ form_start(form) }}
+	    {{ form_row(form.username) }}
+	    {{ form_row(form.email) }}
+	    {{ form_row(form.plainPassword.first) }}
+	    {{ form_row(form.plainPassword.second) }}
+	    <button class="btn btn-secondary" type="submit">Register</button>
+	{{ form_end(form) }}
+</div>
+{% endblock %}

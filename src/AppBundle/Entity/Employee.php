@@ -12,11 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @ORM\Entity(repositoryClass="AppBundle\Repository\EmployeeRepository")
  */
 class Employee
-{
-	public function __construct() {
-        $this->children = new ArrayCollection();
-    }
-
+{	
 	/**
 	 * @ORM\Column(name="employee_id", type="integer")
 	 * @ORM\Id	 
@@ -33,7 +29,7 @@ class Employee
 	 * Every employee can have only one position
 	 *
      * @ORM\ManyToOne(targetEntity="Position")
-     * @ORM\JoinColumn(name="employee_position_id", referencedColumnName="position_id")
+     * @ORM\JoinColumn(name="employee_position_id", referencedColumnName="position_id", onDelete="CASCADE")
      */
 	private $positionId;
 
@@ -58,9 +54,13 @@ class Employee
 	 * Every employee have one parent employee
 	 *
      * @ORM\ManyToOne(targetEntity="Employee", inversedBy="children")
-     * @ORM\JoinColumn(name="employee_parent_id", referencedColumnName="employee_id")
+     * @ORM\JoinColumn(name="employee_parent_id", referencedColumnName="employee_id", onDelete="CASCADE")
      */
 	private $parentId;
+
+	public function __construct() {
+        $this->children = new ArrayCollection();
+    }
 
 	public function getId()
 	{

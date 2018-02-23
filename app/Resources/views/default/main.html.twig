@@ -2,10 +2,17 @@
 
 {% block body %}
     <div id="out-tree">
+        {% if app.session.flashBag.has('success') %}
+            <div class="alert alert-success">
+                {% for msg in app.session.flashBag.get('success') %}
+                    {{ msg }}
+                {% endfor %}
+            </div>
+        {% endif %}
         <h3>{{ "Tree" }}</h3>
         <br><br>
         <div class="list-group">
-        {% if employees_list is defined %}
+        {% if employees_list is defined and employees_list|length > 0 %}
             {% for employee in employees_list %}
                 {% set position_level = employee.positionId.level %}
                 {% if position_level == 1 %}
@@ -23,7 +30,7 @@
                 <a href="#" class="list-group-item list-group-item-action {{color_phrase ?? ''}}" style="margin-left: {{position_level * 50}}px;">{{ employee.fullName }} <span>---{{ employee.positionId.name }}---</span></a>
             {% endfor %}
         {% else %}
-            {{ "No employees" }}
+            <span style="margin-left: 50px;">{{ "No employees" }}</span>
         {% endif %}
         </div>
     </div>
