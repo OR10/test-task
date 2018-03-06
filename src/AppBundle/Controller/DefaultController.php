@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Employee;
 use AppBundle\Entity\Position;
+use AppBundle\Form\ImageType;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -115,6 +116,14 @@ class DefaultController extends Controller
 																																													
 		}
 
+		$employee = new Employee();
+		$form = $this->createForm(ImageType::class, $employee, array(
+			'action' => $this->generateUrl('employee_add'),));
+        $form->handleRequest($request);
+
+        // Need different actions: employee_add && employee_update
+        // Set this in the template, where check what the current action is?
+
 		$positionsArr = $this->getDoctrine()->getRepository('AppBundle:Position')->findAll();
 		// Is it necessary? Maybe only in Twig?
 		if (!$positionsArr) {
@@ -127,6 +136,7 @@ class DefaultController extends Controller
 			'employees_list' => $employeesArr,
 			'positions_list' => $positionsArr,
 			'sortBy' => 'asc',
+			'form' => $form->createView(),
 		]);
 	}
 
@@ -169,7 +179,6 @@ class DefaultController extends Controller
 			} else {
 				$error .= "Something wrong with position!\n";
 			}
-
 			if ($parentId != false) {
 				// Get new parent
 				$parent = $employeeRepository->findOneById($parentId);
@@ -192,6 +201,20 @@ class DefaultController extends Controller
 			} else {
 				$error .= "Uncorrect date!\n";
 			}
+			if (null !== $request->files->get('image_image')) {
+				$file = $request->files->get('image_image');
+		        $fileName = $this->generateUniqueFileName().'.'.$file->guessExtension();
+		        $file->move(
+		            $this->getParameter('headshots_directory'),
+		            $fileName
+		        );
+		        $employee->setImage($fileName);
+				// return new Response (
+				// 	json_encode(array(
+				// 		'error' => $request->files->get('image_image'),
+				// 	)
+				// ));
+			}
 
 			if ($error != '') {
 				return new Response (
@@ -203,6 +226,12 @@ class DefaultController extends Controller
 				$em->persist($employee);
 				$em->flush();		
 			}
+		} else {
+			return new Response (
+				json_encode(array(
+					'error' => $employeeId
+				)
+			));
 		}
 
 		$employeesArr = $employeeRepository->findAll();
@@ -223,9 +252,17 @@ class DefaultController extends Controller
 	 */
 	public function addEmployeeAction(Request $request)
 	{
+
+		// !!!
+		// Change all POST to this $request->request->get('parameter')
+		// !!!
+
+		$employee = new Employee();
+		$form = $this->createForm(ImageType::class, $employee);
+        $form->handleRequest($request);
+
 		$em = $this->getDoctrine()->getManager();
 		$employeeRepository = $em->getRepository('AppBundle:Employee');
-		
 		// Add first CEO if no employees yet
 		$fullName = isset($_POST['fullName']) ? $_POST['fullName'] : false;
 		$positionId = isset($_POST['positionId']) ? $_POST['positionId'] : false;
@@ -238,19 +275,31 @@ class DefaultController extends Controller
 			$parentEmployee = $employeeRepository->findOneById($parentId);
 			$parent = $em->getReference('AppBundle:Employee', $parentEmployee->getId());
 		}
-
 		$position = $this->getDoctrine()->getRepository('AppBundle:Position')->findOneById($positionId);
 		if ($position) {
 			$lastId = $em->createQuery('SELECT e.id FROM AppBundle:Employee e ORDER BY e.id DESC')
 				->setMaxResults(1)
 				->getResult();
-			if ($lastId && $parentEmployee) {
+			if ($lastId && isset($parentEmployee)) {
 				$pk = $lastId[0]['id'] + 1;
 			} else {
 				$pk = 1;
 			}
 
-			$employee = new Employee();
+			if (null !== $request->files->get('image_image')) {
+	            $file = $request->files->get('image_image');
+	            $fileName = $this->generateUniqueFileName().'.'.$file->guessExtension();
+	            $file->move(
+	                $this->getParameter('headshots_directory'),
+	                $fileName
+	            );
+	   //          return new Response (
+				// 	json_encode(array(
+				// 		'error' => $fileName,
+				// 	)
+				// ));
+	            $employee->setImage($fileName);
+	        }
 			$employee->setId($pk);
 			$employee->setFullName($fullName);
 			$employee->setPositionId($em->getReference('AppBundle:Position', $position->getId()));
@@ -260,7 +309,12 @@ class DefaultController extends Controller
 			$em->persist($employee);
 			$em->flush();
 		} else {
-			$error = 'Some error? -_-';
+			$error = 'Some error with position? -_- +'.$positionId;
+			return new Response (
+				json_encode(array(
+					'error' => $error,
+				)
+			));
 		}
 
 		$employeesArr = $employeeRepository->findAll();
@@ -268,13 +322,22 @@ class DefaultController extends Controller
 			->loadTemplate("default/employees.html.twig");
 		$newTable = $template->renderBlock("table", array(
 			'employees_list' => $employeesArr));
+		$parentEmployeesBlock = $template->renderBlock("parentEmployee", array(
+			'employees_list' => $employeesArr));
 
 		return new Response (
 			json_encode(array(
-				'error' => isset($error) ? $error : false,
-				'newTable' => isset($newTable) ? $newTable : false
+				'no_error' => [$form->get('image')->getData(),
+							$form->isSubmitted(),
+							$form->isValid(),
+							$request->request->get('image'),
+							$form['image']->getData(),
+							$employee->getImage(),
+							$request->files->get('image')],
+				'newTable' => isset($newTable) ? $newTable : false,
+				'parentEmployee' => isset($parentEmployeesBlock) ? $parentEmployeesBlock : false
 			)
-		));	
+		));
 	}
 
 	/**
@@ -286,14 +349,28 @@ class DefaultController extends Controller
 		$employeeRepository = $em->getRepository('AppBundle:Employee');
 		$employee = $employeeRepository->findOneById($employeeId);
 		if ($employee) {
+			if ($employee->getParentId() != null) {
+				$parentId = $employee->getParentId()->getId();				
+			} else {
+				$this->addFlash(
+		            'danger',
+		            'Do you want to remove the CEO? First set new one like a parent for current director.'
+		        );
+		        return $this->redirectToRoute('employees_list');
+			}
+			$parentOfCurrent = $em->getReference('AppBundle:Employee', $parentId);
+			$employeeChildren = $employeeRepository->findBy(array('parentId' => $employeeId));
+			foreach ($employeeChildren as $childEmployee) {
+				$childEmployee->setParentId($parentOfCurrent);
+			}
 			$em->remove($employee);
 			$em->flush();
+		
+			$this->addFlash(
+	            'success',
+	            'User was successfully deleted'
+	        );
 		}
-
-		$this->addFlash(
-            'success',
-            'User was successfully deleted'
-        );
 
         return $this->redirectToRoute('employees_list');
 	}
@@ -314,4 +391,8 @@ class DefaultController extends Controller
 	    return checkdate($month, $day, $year);
 	}
 
+	private function generateUniqueFileName()
+    {
+        return md5(uniqid());
+    }
 }

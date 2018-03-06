@@ -108,3 +108,16 @@ a:hover {
 #log-buttons {
 	float: right;
 }
+#headshot {
+	width: 50px;
+	text-align: center;
+}
+#headshot img {
+	width: 40px;
+	height: 40px;
+}
+#currentModalImg {
+	display: block;
+	width: 100px;
+	height: 100px;
+}

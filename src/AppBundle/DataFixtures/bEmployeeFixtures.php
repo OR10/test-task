@@ -36,7 +36,7 @@ class bEmployeeFixtures extends Fixture
 		// For one Junior (position #4) - 1 Trainee (position #5)
 		$traineesStack = 1;
 		
-		for ($i = 0; $i < 110; $i++) {			
+		for ($i = 0; $i < 4; $i++) {			
 			$employee = new Employee();
 			// Set parent employees for each employee (e.g. For Junior parent is Middle etc.)
 			if (isset($lastSeniorId) && ($middlesStack > 0 || $juniorsStack > 0)) {

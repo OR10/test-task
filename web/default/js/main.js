@@ -35,6 +35,9 @@ $(document).on('click', '#out-tree div[name="searchWrapper"] button', function()
 
 $(document).on('click', '#out-tree table[name="employeeTable"] td:has(i[name="editBtn"])', function() {
 	$('#employeeModal').modal("show");
+	$('#employeeModal h4.modal-title').text('Edit Employee');
+	// Reset old downloaded image from the form if exists
+	$("#uploadImage").replaceWith($("#uploadImage").val('').clone(true));
 	var dataRow = $(this).closest("tr");
 	var employeeId = $(dataRow).find('td[name="employeeId"]').text();
 	var fullName = $(dataRow).find('td[name="fullName"]').text();
@@ -46,6 +49,22 @@ $(document).on('click', '#out-tree table[name="employeeTable"] td:has(i[name="ed
 	setModalFields();
 	setModalFields(fullName, positionId, salary, parentId, recruitingDate);
 
+	var fileName = $(dataRow).find('#headshot img').attr('src');
+	if (fileName !== undefined) {
+		if ($('#currentModalImg').length) {
+			$('#currentModalImg').attr('src', fileName);
+		} else {
+			$('#uploadImage').before(function() {
+				var tag = '<div class="form-group">';
+				tag += '<label>Current image</label>';
+				tag += '<img id="currentModalImg" src="'+fileName+'">';
+				tag += '</div>';
+
+				return tag;
+			});
+		}
+	}
+
 	$('#saveBtn').off();
 	$('#saveBtn').on('click', function() {
 		var newFullName = $('#employeeModal .modal-body input[name="fullName"]').val()
@@ -53,35 +72,42 @@ $(document).on('click', '#out-tree table[name="employeeTable"] td:has(i[name="ed
 		var newSalary = $('#employeeModal .modal-body input[name="salary"]').val()
 		var newParentId = $('#employeeModal .modal-body select[name="employees"]').find(":selected").attr('value');
 		var newRecruitingDate = $('#employeeModal .modal-body input[name="recruitingDate"]').val();
+		var newFile = $('#uploadImage input:file')[0].files[0];
 
 		if (fullName.localeCompare(newFullName) != 0 
 			|| positionId != newPositionId 
 			|| salary.localeCompare(newSalary) != 0 
 			|| parentId != newParentId 
-			|| recruitingDate.localeCompare(newRecruitingDate) != 0) {
+			|| recruitingDate.localeCompare(newRecruitingDate) != 0
+			|| newFile != undefined) {
+
+			var formData = new FormData();
+			formData.append('employeeId', employeeId);
+			formData.append('fullName', newFullName);
+			formData.append('positionId', newPositionId);
+			formData.append('salary', newSalary);
+			formData.append('parentId', newParentId);
+			formData.append('recruitingDate', newRecruitingDate);
+        	formData.append('image_image', newFile);
 
 			$.ajax({
 				type: 'POST',
 				url: '/update-employee',
-				data: {
-					employeeId: employeeId,
-					fullName: newFullName,
-					positionId: newPositionId,
-					salary: newSalary,
-					parentId: newParentId,
-					recruitingDate: newRecruitingDate
-				},
+				processData: false,
+				contentType: false,
+				data: formData,
 				success: function(response) {
 					var response = JSON.parse(response);
-					if (response.error !== undefined && response.error.length > 0) {
-						alert(response.error);
+					console.log(newPositionId);
+					console.log(response.error);
+					if (response.error !== null && response.error !== undefined && response.error.length > 0) {
 					} else {
 						$('#employeeModal').modal("hide");
 						if ($('#out-tree table[name="employeeTable"]')) {
 							$('#out-tree table[name="employeeTable"]').replaceWith(response.newTable);
 						}
 						$('#employeeModal').on('hidden.bs.modal', function () {
-					    	alert('Data has been successfully updated!');
+					    	// alert('Data has been successfully updated!');
 					    	$('#employeeModal').off('hidden.bs.modal');
 						});
 					}
@@ -102,6 +128,11 @@ function setModalFields(p1='', p2='', p3='', p4='', p5='') {
 $('#addEmployee').on('click', function() {
 	$('#employeeModal').modal("show");
 	$('#employeeModal h4.modal-title').text('Add new Employee');
+	// Reset old downloaded image from the form if exists
+	$("#uploadImage").replaceWith($("#uploadImage").val('').clone(true));
+	if ($('#currentModalImg').length) {
+		$('#currentModalImg').closest('div.form-group').remove();
+	}
 	setModalFields();
 
 	$('#saveBtn').off();
@@ -122,7 +153,6 @@ $('#addEmployee').on('click', function() {
 			var year = dateObj.getFullYear();
 			var month = parseInt(dateObj.getMonth().toString()) + 1;
 			var day = dateObj.getDate().toString();
-
 			if (String(month).length == 1) {
 				month = '0'+month;
 			}
@@ -132,27 +162,36 @@ $('#addEmployee').on('click', function() {
 
 			if (isNaN(year) == false && isNaN(month) == false && isNaN(day) == false) {
 				var date = year+'-'+month+'-'+day;
+
+				var file = $('#uploadImage input:file')[0].files[0];
+				var formData = new FormData();
+				if (file) {
+	        		formData.append('image_image', file);
+				}
+				formData.append('fullName', fullName);
+				formData.append('positionId', positionId);
+				formData.append('salary', salary);
+				formData.append('parentId', parentId);
+				formData.append('recruitingDate', date);
+
 				$.ajax({
 					type: 'POST',
 					url: '/add-employee',
-					data: {
-						fullName: fullName,
-						positionId: positionId,
-						salary: salary,
-						parentId: parentId,
-						recruitingDate: date
-					},
+        			processData: false,
+					contentType: false,
+					data: formData,
 					success: function(response) {
 						var response = JSON.parse(response);
-						if (response.error !== undefined && response.error.length > 0) {
 							console.log(response.error);
+						if (response.error !== undefined && response.error !== null && response.error.length > 0) {
 						} else {
 							$('#employeeModal').modal("hide");
 							if ($('#out-tree table[name="employeeTable"]')) {
 								$('#out-tree table[name="employeeTable"]').replaceWith(response.newTable);
 							}
+							$("#parentEmployee").replaceWith(response.parentEmployee);
 							$('#employeeModal').on('hidden.bs.modal', function () {
-						    	alert('Employee has been successfully added!');
+						    	// alert('Employee has been successfully added!');
 						    	$('#employeeModal').off('hidden.bs.modal');
 							});							
 						}
@@ -162,13 +201,14 @@ $('#addEmployee').on('click', function() {
 			} else {
 				alert('Bad date!');
 			}
+		} else {
+			alert('Some data is not correct!');
 		}
 	});
 });
 
-$('#out-tree table td[name="deleteCell"]').on('click', function() {
-	var href = $('#out-tree table td[name="deleteCell"] a').attr('href');
+$('#out-tree table td[name="deleteCell"]').on('click', function(e) {
+	var href = $(this).children('a').attr('href');
 	window.location.href = href;
-	// $('#out-tree table td[name="deleteCell"] a').click();
-	// $('#out-tree table td[name="deleteCell"]').off();
+	e.preventDefault();
 });

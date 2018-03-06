@@ -25,5 +25,5 @@ security:
             provider: our_db_provider
 
     access_control:
-        - { path: ^/employees, roles: ROLE_USER }
+        #- { path: ^/employees, roles: ROLE_USER }
         - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }

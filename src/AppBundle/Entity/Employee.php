@@ -5,6 +5,8 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use AppBundle\Entity\Position;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * @ORM\Entity
@@ -29,7 +31,7 @@ class Employee
 	 * Every employee can have only one position
 	 *
      * @ORM\ManyToOne(targetEntity="Position")
-     * @ORM\JoinColumn(name="employee_position_id", referencedColumnName="position_id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="employee_position_id", referencedColumnName="position_id")
      */
 	private $positionId;
 
@@ -54,9 +56,18 @@ class Employee
 	 * Every employee have one parent employee
 	 *
      * @ORM\ManyToOne(targetEntity="Employee", inversedBy="children")
-     * @ORM\JoinColumn(name="employee_parent_id", referencedColumnName="employee_id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="employee_parent_id", referencedColumnName="employee_id")
      */
 	private $parentId;
+
+	/**
+	 * @ORM\Column(name="image_name", type="string", nullable=true)
+	 *
+	 * @Assert\File(
+	 * 		mimeTypes = {"image/png", "image/jpeg", "image/jpg"}
+	 * )
+	 */
+	private $image;
 
 	public function __construct() {
         $this->children = new ArrayCollection();
@@ -160,5 +171,16 @@ class Employee
     public function getChildren()
     {
         return $this->children;
+    }
+
+    public function getImage()
+    {
+        return $this->image;
+    }
+     
+    public function setImage($image)
+    {
+        $this->image = $image;
+        return $this;
     }
 }
