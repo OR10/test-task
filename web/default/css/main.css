@@ -121,3 +121,9 @@ a:hover {
 	width: 100px;
 	height: 100px;
 }
+#out-tree .pagination {
+	padding-top: 50px;
+}
+#employeeModal select[class="form-control"] {
+	background-color: #ddd;
+}

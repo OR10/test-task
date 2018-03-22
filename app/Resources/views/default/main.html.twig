@@ -3,17 +3,24 @@
 {% block body %}
     <div id="out-tree">
         {% if app.session.flashBag.has('success') %}
-            <div class="alert alert-success">
-                {% for msg in app.session.flashBag.get('success') %}
+            {% set flashStyleClass = 'alert alert-success' %}
+            {% set flashType = 'success' %}
+        {% elseif app.session.flashBag.has('danger') %}
+            {% set flashStyleClass = 'alert alert-danger' %}
+            {% set flashType = 'danger' %}
+        {% endif %}
+        {% if flashType is defined %}
+            <div class="{{ flashStyleClass ?? '' }}">
+                {% for msg in app.session.flashBag.get(flashType) %}
                     {{ msg }}
                 {% endfor %}
             </div>
         {% endif %}
         <h3>{{ "Tree" }}</h3>
         <br><br>
-        <div class="list-group">
-        {% if employees_list is defined and employees_list|length > 0 %}
-            {% for employee in employees_list %}
+        <div class="list-group" id="employees-tree">
+       	{% if pagination is defined and pagination|length > 0 %}
+            {% for employee in pagination %}
                 {% set position_level = employee.positionId.level %}
                 {% if position_level == 1 %}
                     {% set color_phrase = 'list-group-item-dark' %}
@@ -27,11 +34,17 @@
                     {% set color_phrase = 'list-group-item-warning' %}
                 {% endif %}
 
-                <a href="#" class="list-group-item list-group-item-action {{color_phrase ?? ''}}" style="margin-left: {{position_level * 50}}px;">{{ employee.fullName }} <span>---{{ employee.positionId.name }}---</span></a>
+                <a href="#" class="list-group-item list-group-item-action {{color_phrase ?? ''}}" style="margin-left: {{position_level * 50}}px;" level="{{ employee.positionId.level }}">{{ employee.fullName }} <span>---{{ employee.positionId.name }}---</span></a>
             {% endfor %}
         {% else %}
             <span style="margin-left: 50px;">{{ "No employees" }}</span>
         {% endif %}
+
         </div>
+        {% if pagination is defined and pagination|length > 0 %}
+	        <div class="navigation">
+			    {{ knp_pagination_render(pagination) }}
+			</div>
+		{% endif %}
     </div>
 {% endblock %}

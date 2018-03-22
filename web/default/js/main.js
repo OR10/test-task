@@ -8,8 +8,8 @@ $(document).on('click', '#out-tree .table.table-hover thead th', function() {
 			},
 		success: function(response) {
 			var response = JSON.parse(response);
-			if ($('#out-tree table[name="employeeTable"]')) {
-				$('#out-tree table[name="employeeTable"]').replaceWith(response.newTable);
+			if ($('#employeeTable')) {
+				$('#employeeTable').replaceWith(response.newTable);
 			}
 		}
 	})
@@ -23,8 +23,8 @@ $(document).on('click', '#out-tree div[name="searchWrapper"] button', function()
 			data: 'searchWord='+searchWord,
 			success: function(response) {
 				var response = JSON.parse(response);
-				if ($('#out-tree table[name="employeeTable"]') && response.newTable != false) {
-					$('#out-tree table[name="employeeTable"]').replaceWith(response.newTable);
+				if ($('#employeeTable') && response.newTable != false) {
+					$('#employeeTable').replaceWith(response.newTable);
 				} else if (response.msg.length > 0) {
 					alert(response.msg);
 				}
@@ -32,6 +32,25 @@ $(document).on('click', '#out-tree div[name="searchWrapper"] button', function()
 		})
 	}
 });
+
+// When change current employee's position in modal window
+function checkCurrentPositionChange() {
+	var currentEmployeeLevel = $(document).find('#currentPosition select[name="positions"]').find(':selected').attr('level');
+	$(document).find('#parentEmployee select[name="employees"] option').each(function() {
+		var parentLevel = $(this).attr('level');
+		if (currentEmployeeLevel - parentLevel != 1) {
+			$(this).attr('disabled', 'disabled');
+		} else if ($(this).attr('disabled') !== undefined) {
+			$(this).removeAttr('disabled');
+		}
+	})
+}
+
+$(document).ready(function() {	
+	$('#currentPosition select[name="positions"]').on('change', function() {
+		checkCurrentPositionChange();
+	});
+})
 
 $(document).on('click', '#out-tree table[name="employeeTable"] td:has(i[name="editBtn"])', function() {
 	$('#employeeModal').modal("show");
@@ -48,6 +67,7 @@ $(document).on('click', '#out-tree table[name="employeeTable"] td:has(i[name="ed
 
 	setModalFields();
 	setModalFields(fullName, positionId, salary, parentId, recruitingDate);
+	checkCurrentPositionChange();
 
 	var fileName = $(dataRow).find('#headshot img').attr('src');
 	if (fileName !== undefined) {
@@ -103,11 +123,11 @@ $(document).on('click', '#out-tree table[name="employeeTable"] td:has(i[name="ed
 					if (response.error !== null && response.error !== undefined && response.error.length > 0) {
 					} else {
 						$('#employeeModal').modal("hide");
-						if ($('#out-tree table[name="employeeTable"]')) {
-							$('#out-tree table[name="employeeTable"]').replaceWith(response.newTable);
+						if ($('#employeeTable')) {
+							$('#employeeTable').replaceWith(response.newTable);
 						}
 						$('#employeeModal').on('hidden.bs.modal', function () {
-					    	// alert('Data has been successfully updated!');
+					    	alert('Data has been successfully updated!');
 					    	$('#employeeModal').off('hidden.bs.modal');
 						});
 					}
@@ -125,7 +145,7 @@ function setModalFields(p1='', p2='', p3='', p4='', p5='') {
 	$('#employeeModal .modal-body input[name="recruitingDate"]').val(p5);
 }
 
-$('#addEmployee').on('click', function() {
+$(document).on('click', '#addEmployee', function() {
 	$('#employeeModal').modal("show");
 	$('#employeeModal h4.modal-title').text('Add new Employee');
 	// Reset old downloaded image from the form if exists
@@ -134,6 +154,7 @@ $('#addEmployee').on('click', function() {
 		$('#currentModalImg').closest('div.form-group').remove();
 	}
 	setModalFields();
+	checkCurrentPositionChange();
 
 	$('#saveBtn').off();
 	$('#saveBtn').on('click', function() {		
@@ -146,7 +167,7 @@ $('#addEmployee').on('click', function() {
 		var recruitingDate = $('#employeeModal .modal-body input[name="recruitingDate"]').val();
 
 		if (fullName.length > 0
-			&& positionLevel > parentLevel
+			&& positionLevel - parentLevel == 1
 			&& salary.length > 0 && isNaN(salary) == false
 			&& recruitingDate.length > 0) {
 			dateObj = new Date(recruitingDate);
@@ -174,6 +195,9 @@ $('#addEmployee').on('click', function() {
 				formData.append('parentId', parentId);
 				formData.append('recruitingDate', date);
 
+				console.log(formData);
+				console.log('kok');
+
 				$.ajax({
 					type: 'POST',
 					url: '/add-employee',
@@ -186,12 +210,12 @@ $('#addEmployee').on('click', function() {
 						if (response.error !== undefined && response.error !== null && response.error.length > 0) {
 						} else {
 							$('#employeeModal').modal("hide");
-							if ($('#out-tree table[name="employeeTable"]')) {
-								$('#out-tree table[name="employeeTable"]').replaceWith(response.newTable);
+							if ($('#employeeTable')) {
+								$('#employeeTable').replaceWith(response.newTable);
 							}
 							$("#parentEmployee").replaceWith(response.parentEmployee);
 							$('#employeeModal').on('hidden.bs.modal', function () {
-						    	// alert('Employee has been successfully added!');
+						    	alert('Employee has been successfully added!');
 						    	$('#employeeModal').off('hidden.bs.modal');
 							});							
 						}
@@ -212,3 +236,31 @@ $('#out-tree table td[name="deleteCell"]').on('click', function(e) {
 	window.location.href = href;
 	e.preventDefault();
 });
+
+$(document).ready(function() {
+	$('#employees-tree a').each(function() {
+		if ($(this).attr('level') > 2) {
+			$(this).hide();
+		}
+	})
+	$('#employees-tree a').on('click', function(e) {
+		e.preventDefault();
+		if ($(this).attr('level') == 2) {
+			showNext($(this));
+		}
+	})
+});
+
+function showNext(currentElem) {
+	var nextElem = $(currentElem).next();
+	if (nextElem.attr('level') != 2) {
+		if ($(nextElem).is(':hidden')) {
+			$(nextElem).show('slow');
+		} else {
+			$(nextElem).hide('slow');
+		}
+		showNext(nextElem);
+	} else {
+		return;
+	}
+}

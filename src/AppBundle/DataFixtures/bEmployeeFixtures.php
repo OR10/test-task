@@ -30,13 +30,15 @@ class bEmployeeFixtures extends Fixture
 		$pk++;
 
 		// For one Senior (position #2) - 5 Middle developers
-		$middlesStack = 5;
+		// $middlesStack = 5;
+		$middlesStack = 2;
 		// For one Middle (position #3) - 3 Juniors
-		$juniorsStack = 3;
+		// $juniorsStack = 3;
+		$juniorsStack = 1;
 		// For one Junior (position #4) - 1 Trainee (position #5)
 		$traineesStack = 1;
 		
-		for ($i = 0; $i < 4; $i++) {			
+		for ($i = 0; $i < 5000; $i++) {			
 			$employee = new Employee();
 			// Set parent employees for each employee (e.g. For Junior parent is Middle etc.)
 			if (isset($lastSeniorId) && ($middlesStack > 0 || $juniorsStack > 0)) {
@@ -60,7 +62,8 @@ class bEmployeeFixtures extends Fixture
 					$lastMiddleId = $pk;
 					$middlesStack--;
 					// For one Middle (position #3) - 3 Juniors
-					$juniorsStack = 3;
+					// $juniorsStack = 3;
+					$juniorsStack = 1;
 					$this->setReference('parent_employee'.$currentPosition, $employee);
 				}
 			} else {
@@ -70,7 +73,8 @@ class bEmployeeFixtures extends Fixture
 				$lastMiddleId = null;
 				$lastJuniorId = null;
 				// For one Senior (position #2) - 5 Middle developers
-				$middlesStack = 5;
+				// $middlesStack = 5;
+				$middlesStack = 2;
 				$this->setReference('parent_employee'.$currentPosition, $employee);
 			}
 
