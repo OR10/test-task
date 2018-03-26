@@ -38,12 +38,6 @@ class DefaultController extends Controller
 				$isLastElement = $res[2];
 			} while (sizeof($orphansArr) > 0 || $isLastElement == false);
 			array_unshift($employeesArr, $director);
-		} else {
-			$this->addFlash(
-	            'danger',
-	            'No director has been appointed!'
-	        );
-			return $this->render('default/main.html.twig');
 		}
 
 	    $pagination = $this->getPagination($employeesArr, $request);
@@ -218,7 +212,7 @@ class DefaultController extends Controller
 		// Is it necessary? Maybe only in Twig? - Do it!
 		if (!$positionsArr) {
 			throw $this->createNotFoundException(
-			'No positions found!');
+			'No positions found to employees! Use fixtures to fill the database');
 		}
 		$employeesArr = $this->getEmployees();
 

@@ -18,6 +18,7 @@ class Version20180225154715 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
+        $this->skipIf("COL_LENGTH('employees_test.employee', 'image') IS NULL", 'Skipped image column'); // Check if this column exists
         $this->addSql('ALTER TABLE employee ADD image VARCHAR(255) DEFAULT NULL');
     }
 
