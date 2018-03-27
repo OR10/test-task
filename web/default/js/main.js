@@ -118,9 +118,8 @@ $(document).on('click', '#out-tree table[name="employeeTable"] td:has(i[name="ed
 				data: formData,
 				success: function(response) {
 					var response = JSON.parse(response);
-					console.log(newPositionId);
-					console.log(response.error);
 					if (response.error !== null && response.error !== undefined && response.error.length > 0) {
+						alert(response.error);
 					} else {
 						$('#employeeModal').modal("hide");
 						if ($('#employeeTable')) {
@@ -167,7 +166,7 @@ $(document).on('click', '#addEmployee', function() {
 		var recruitingDate = $('#employeeModal .modal-body input[name="recruitingDate"]').val();
 
 		if (fullName.length > 0
-			&& positionLevel - parentLevel == 1
+			&& (positionLevel - parentLevel == 1 || positionId == undefined)
 			&& salary.length > 0 && isNaN(salary) == false
 			&& recruitingDate.length > 0) {
 			dateObj = new Date(recruitingDate);
@@ -195,9 +194,6 @@ $(document).on('click', '#addEmployee', function() {
 				formData.append('parentId', parentId);
 				formData.append('recruitingDate', date);
 
-				console.log(formData);
-				console.log('kok');
-
 				$.ajax({
 					type: 'POST',
 					url: '/add-employee',
@@ -206,8 +202,8 @@ $(document).on('click', '#addEmployee', function() {
 					data: formData,
 					success: function(response) {
 						var response = JSON.parse(response);
-							console.log(response.error);
 						if (response.error !== undefined && response.error !== null && response.error.length > 0) {
+							alert(response.error);
 						} else {
 							$('#employeeModal').modal("hide");
 							if ($('#employeeTable')) {

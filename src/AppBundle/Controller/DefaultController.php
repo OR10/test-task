@@ -315,7 +315,7 @@ class DefaultController extends Controller
 		} else {
 			return new Response (
 				json_encode(array(
-					'error' => $employeeId
+					'error' => 'Can not get employee by this id!'
 				)
 			));
 		}
@@ -359,7 +359,17 @@ class DefaultController extends Controller
 			$parentEmployee = $employeeRepository->findOneById($parentId);
 			$parent = $em->getReference('AppBundle:Employee', $parentEmployee->getId());
 		}
-		$position = $this->getDoctrine()->getRepository('AppBundle:Position')->findOneById($positionId);
+
+		if (is_numeric($positionId)) {
+			$position = $this->getDoctrine()->getRepository('AppBundle:Position')->findOneById($positionId);
+		} else {
+			$error = 'There are no positions in the database! Fill it! (e.g. using fixtures)';
+			return new Response (
+				json_encode(array(
+					'error' => $error,
+				)
+			));
+		}
 		if ($position) {
 			$lastId = $em->createQuery('SELECT e.id FROM AppBundle:Employee e ORDER BY e.id DESC')
 				->setMaxResults(1)
@@ -387,13 +397,6 @@ class DefaultController extends Controller
 			$employee->setSalary($salary);
 			$em->persist($employee);
 			$em->flush();
-		} else {
-			$error = 'Some error with position? -_-';
-			return new Response (
-				json_encode(array(
-					'error' => $error,
-				)
-			));
 		}
 
 		$employeesArr = $employeeRepository->findAll();
