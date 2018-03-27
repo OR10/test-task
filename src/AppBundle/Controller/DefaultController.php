@@ -20,13 +20,21 @@ class DefaultController extends Controller
 	public function indexAction(Request $request)
 	{      
 		$employeesArr = $this->getEmployees();		
-		foreach ($employeesArr as $key => $value) {
-			if ($value->getPositionId()->getLevel() == '1') {
-				$director = $value;
-				unset($employeesArr[$key]);
-				break;
+		if ($employeesArr != false) {
+			foreach ($employeesArr as $key => $value) {
+				if ($value->getPositionId()->getLevel() == '1') {
+					$director = $value;
+					unset($employeesArr[$key]);
+					break;
+				}
 			}
-		}      
+		} else {
+			$this->addFlash(
+	            'danger',
+	            'There are some troubles with database structure'
+	        );
+	        return $this->render('default/main.html.twig');
+		}
 		// Prepare employees tree to show
 		if (isset($director)) {
 			$orphansArr = [];
@@ -208,13 +216,15 @@ class DefaultController extends Controller
 			'action' => $this->generateUrl('employee_add'),));
         $form->handleRequest($request);
 
-		$positionsArr = $this->getDoctrine()->getRepository('AppBundle:Position')->findAll();
-		// Is it necessary? Maybe only in Twig? - Do it!
-		if (!$positionsArr) {
-			throw $this->createNotFoundException(
-			'No positions found to employees! Use fixtures to fill the database');
-		}
 		$employeesArr = $this->getEmployees();
+		if ($employeesArr == false) {
+			$this->addFlash(
+	            'danger',
+	            'There are some troubles with database structure'
+	        );
+	        return $this->render('default/main.html.twig');
+		}
+		$positionsArr = $this->getDoctrine()->getRepository('AppBundle:Position')->findAll();
 
 	    $pagination = $this->getPagination($employeesArr, $request);
 
@@ -443,7 +453,12 @@ class DefaultController extends Controller
 
 	public function getEmployees()
 	{
-		$employees = $this->getDoctrine()->getRepository('AppBundle:Employee')->findAll();
+		$schemaManager = $this->getDoctrine()->getConnection()->getSchemaManager();
+		if ($schemaManager->tablesExist(array('employee')) == true) {
+			$employees = $this->getDoctrine()->getRepository('AppBundle:Employee')->findAll();		
+		} else {			
+			return false;
+		}
 
 		return $employees;
 	}

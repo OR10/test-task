@@ -46,6 +46,15 @@ class SecurityController extends Controller
             $username = $user->getUsername();
 			$email = $user->getEmail();
 
+			$schemaManager = $this->getDoctrine()->getConnection()->getSchemaManager();
+			if ($schemaManager->tablesExist(array('user')) != true) {
+				$this->addFlash(
+		            'danger',
+		            'There are some troubles with database structure'
+		        );
+		        return $this->render('default/main.html.twig');
+			}
+
 			$em = $this->getDoctrine()->getManager();			
 			$query = $em->createQuery("SELECT u.username, u.email FROM AppBundle:User u");
 			$dataArr = $query->getResult();
