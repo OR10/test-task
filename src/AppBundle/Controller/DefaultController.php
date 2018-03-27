@@ -31,7 +31,7 @@ class DefaultController extends Controller
 		} else {
 			$this->addFlash(
 	            'danger',
-	            'There are some troubles with database structure'
+	            'There are some troubles with database structure or it is empty'
 	        );
 	        return $this->render('default/main.html.twig');
 		}
@@ -220,7 +220,7 @@ class DefaultController extends Controller
 		if ($employeesArr == false) {
 			$this->addFlash(
 	            'danger',
-	            'There are some troubles with database structure'
+	            'There are some troubles with database structure or it is empty'
 	        );
 	        return $this->render('default/main.html.twig');
 		}
